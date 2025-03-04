@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
 
@@ -38,8 +39,29 @@ export class ProductsRepository {
       stock: 30,
     },
   ];
+  getUserById: any;
 
   async getProducts() {
     return this.products;
+  }
+  getProductById(id: number) {
+    return this.products.find((product) => product.id === id);
+  }
+
+  createProduct(product: Omit<IProduct, 'id'>) {
+    const id = this.products.length + 1;
+    const newProduct = { id, ...product };
+    this.products = [...this.products, newProduct];
+    return newProduct;
+  }
+
+  putFunction(id) {
+    const product = this.products.find((product) => product.id === id);
+    return ['Logica del put para modificar este producto: ', product];
+  }
+
+  deleteProduct(id: number) {
+    const product = this.products.find((product) => product.id === id);
+    return ['Logica del delete para eliminar este producto: ', product];
   }
 }
