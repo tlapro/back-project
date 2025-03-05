@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
+import { ICredentials } from '../auth/auth.controller';
 
 export interface IUser {
   id: number;
@@ -50,6 +51,7 @@ export class UsersRepository {
 
   async getUsers(page: number, limit: number) {
     return this.users.map(({ password, ...user }) => user);
+    // Logica de paginación
   }
 
   getUserById(id: number) {
@@ -71,5 +73,27 @@ export class UsersRepository {
   deleteUser(id: number) {
     const user = this.users.find((user) => user.id === id);
     return ['Logica del delete para eliminar el usuario con el id: ', user];
+  }
+
+  signIn(credentials: ICredentials) {
+    const { email, password } = credentials;
+
+    if (!email || !password) {
+      throw Error('Completa todos los campos');
+    }
+
+    const user = this.users.find(
+      (user) => user.email === email && user.password === password,
+    );
+
+    if (!user) {
+      throw Error('Usuario o contraseña incorrectos.');
+    }
+    return {
+      message: 'Ingreso exitoso',
+      user: (({ password, ...userWithoutPassword }) => userWithoutPassword)(
+        user,
+      ),
+    };
   }
 }

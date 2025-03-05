@@ -1,6 +1,15 @@
-import { Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProduct } from './products.repository';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -22,11 +31,13 @@ export class ProductsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard)
   putFunction(@Param('id') id: string) {
     return this.productsService.putFunction(Number(id));
   }
 
   @Delete('id')
+  @UseGuards(AuthGuard)
   deleteProduct(@Param('id') id: string) {
     return this.productsService.deleteProduct(Number(id));
   }
