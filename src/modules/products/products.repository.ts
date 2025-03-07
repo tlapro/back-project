@@ -1,66 +1,73 @@
-/* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
-
-export interface IProduct {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  stock: number;
-}
+import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from 'src/entities/product.entity';
+import { Category } from 'src/entities/category.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsRepository {
-  private products: IProduct[] = [
-    {
-      id: 1,
-      name: 'Product 1',
-      description: 'Product 1 description',
-      price: 100,
-      image: 'https://picsum.photos/200/300',
-      stock: 10,
-    },
-    {
-      id: 2,
-      name: 'Product 2',
-      description: 'Product 2 description',
-      price: 200,
-      image: 'https://picsum.photos/200/300',
-      stock: 20,
-    },
-    {
-      id: 3,
-      name: 'Product 3',
-      description: 'Product 3 description',
-      price: 300,
-      image: 'https://picsum.photos/200/300',
-      stock: 30,
-    },
-  ];
-  getUserById: any;
+  constructor(
+    @InjectRepository(Product)
+    private readonly productsRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
+  ) {}
 
-  async getProducts() {
-    return this.products;
-  }
-  getProductById(id: number) {
-    return this.products.find((product) => product.id === id);
-  }
+  async addProducts(
+    products: {
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      category: string;
+    }[],
+  ) {
+    for (const productData of products) {
+      const exists = await this.productsRepository.findOne({
+        where: { name: productData.name },
+      });
 
-  createProduct(product: Omit<IProduct, 'id'>) {
-    const id = this.products.length + 1;
-    const newProduct = { id, ...product };
-    this.products = [...this.products, newProduct];
-    return newProduct;
-  }
+      if (!exists) {
+        const category = await this.categoriesRepository.findOne({
+          where: { name: productData.category },
+        });
 
-  putFunction(id) {
-    const product = this.products.find((product) => product.id === id);
-    return ['Logica del put para modificar este producto: ', product];
-  }
+        if (!category) {
+          console.warn(`⚠️ Categoría '${productData.category}' no encontrada`);
+          continue;
+        }
 
-  deleteProduct(id: number) {
-    const product = this.products.find((product) => product.id === id);
-    return ['Logica del delete para eliminar este producto: ', product];
+        const product = this.productsRepository.create({
+          ...productData,
+          category,
+        });
+
+        await this.productsRepository.save(product);
+      }
+    }
   }
 }
+
+// async getProducts() {
+//   return this.products;
+// }
+// getProductById(id: number) {
+//   return this.products.find((product) => product.id === id);
+// }
+
+// createProduct(product: Omit<IProduct, 'id'>) {
+//   const id = this.products.length + 1;
+//   const newProduct = { id, ...product };
+//   this.products = [...this.products, newProduct];
+//   return newProduct;
+// }
+
+// putFunction(id) {
+//   const product = this.products.find((product) => product.id === id);
+//   return ['Logica del put para modificar este producto: ', product];
+// }
+
+// deleteProduct(id: number) {
+//   const product = this.products.find((product) => product.id === id);
+//   return ['Logica del delete para eliminar este producto: ', product];
+// }

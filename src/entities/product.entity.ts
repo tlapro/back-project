@@ -28,7 +28,7 @@ export class Product {
   @Column()
   stock: number;
 
-  @Column()
+  @Column({ nullable: true })
   imgUrl: string;
 
   @ManyToOne(() => Category, (category) => category.products, {
