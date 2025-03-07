@@ -36,12 +36,13 @@ export class ProductsRepository {
           console.warn(`⚠️ Categoría '${productData.category}' no encontrada`);
           continue;
         }
-
+        console.log(
+          `Cargando en la base de datos el producto: ${productData.name}`,
+        );
         const product = this.productsRepository.create({
           ...productData,
           category,
         });
-
         await this.productsRepository.save(product);
       }
     }

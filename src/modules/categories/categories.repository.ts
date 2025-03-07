@@ -20,6 +20,9 @@ export class CategoriesRepository {
         where: { name: category.name },
       });
       if (!exists) {
+        console.log(
+          `Cargando en la base de datos la categoría: ${category.name}`,
+        );
         await this.categoriesRepository.save(category);
       }
     }
