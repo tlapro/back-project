@@ -1,26 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Get('seeder')
-  async preloadProducts() {
-    await this.productsService.preloadProducts();
-    return { message: 'Productos precargados con categorías asignadas' };
+  @Get()
+  getProducts() {
+    return this.productsService.getProducts();
+  }
+
+  @Get(':id')
+  getProductById(@Param('id') id: string) {
+    return this.productsService.getProductById(id);
   }
 }
-
-// @Get()
-// getProducts() {
-//   return this.productsService.getProducts();
-// }
-
-// @Get(':id')
-// getProductById(@Param('id') id: string) {
-//   return this.productsService.getProductById(Number(id));
-// }
 
 // @Post()
 // createProduct(user: IProduct) {

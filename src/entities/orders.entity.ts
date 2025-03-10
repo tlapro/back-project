@@ -21,7 +21,7 @@ export class Order {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
+  @Column({ type: 'timestamp' })
   date: Date;
 
   @OneToOne(() => OrderDetail, { cascade: true })

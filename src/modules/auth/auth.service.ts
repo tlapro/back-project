@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import { ICredentials } from './auth.controller';
+import { User } from 'src/entities/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -9,12 +9,11 @@ export class AuthService {
   getAuth() {
     return 'Get all auths.';
   }
+  async signUp(user: Omit<User, 'id'>) {
+    return await this.usersRepository.signUp(user);
+  }
 
-  signIn(credentials: ICredentials) {
-    try {
-      return this.usersRepository.signIn(credentials);
-    } catch (error) {
-      throw new Error('Error en la autenticación');
-    }
+  async signIn(credentials: ICredentials) {
+    return await this.usersRepository.signIn(credentials);
   }
 }

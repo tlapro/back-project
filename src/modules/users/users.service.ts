@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { IUser, UsersRepository } from './users.repository';
+import { UsersRepository } from './users.repository';
+import { User } from 'src/entities/users.entity';
+import { ICredentials } from '../auth/auth.controller';
 
 @Injectable()
 export class UsersService {
@@ -9,19 +11,23 @@ export class UsersService {
     return this.usersRepository.getUsers(page, limit);
   }
 
-  getUserById(id: number) {
+  getUserById(id: string) {
     return this.usersRepository.getUserById(id);
   }
 
-  createUser(user: Omit<IUser, 'id'>) {
-    return this.usersRepository.createUser(user);
+  signUp(user: Omit<User, 'id'>) {
+    return this.usersRepository.signUp(user);
   }
 
-  putFunction(id: number) {
+  signIn(credentials: ICredentials) {
+    return this.usersRepository.signIn(credentials);
+  }
+
+  putFunction(id: string) {
     return this.usersRepository.putFunction(id);
   }
 
-  deleteUser(id: number) {
+  deleteUser(id: string) {
     return this.usersRepository.deleteUser(id);
   }
 }

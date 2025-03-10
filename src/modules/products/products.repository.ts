@@ -47,11 +47,25 @@ export class ProductsRepository {
       }
     }
   }
-}
 
-// async getProducts() {
-//   return this.products;
-// }
+  async getProducts() {
+    return this.productsRepository.find({
+      relations: ['category'], // Esto incluye la categoría asociada en cada producto
+    });
+  }
+
+  async getProductById(id: string): Promise<Product> {
+    const product = await this.productsRepository.findOneBy({ id });
+    if (!product) {
+      throw Error('El producto no fue encontrado');
+    }
+    return product;
+  }
+
+  async saveProduct(product: Product) {
+    return this.productsRepository.save(product);
+  }
+}
 // getProductById(id: number) {
 //   return this.products.find((product) => product.id === id);
 // }

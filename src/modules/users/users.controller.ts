@@ -11,9 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { IUser } from './users.repository';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { User } from 'src/entities/users.entity';
+import { ICredentials } from '../auth/auth.controller';
 
 @Controller('users')
 export class UsersController {
@@ -30,11 +31,11 @@ export class UsersController {
   @Get(':id')
   @UseGuards(AuthGuard)
   getUserById(@Param('id') id: string) {
-    return this.usersService.getUserById(Number(id));
+    return this.usersService.getUserById(id);
   }
 
   @Post()
-  createUser(@Res() response: Response, @Body() user: IUser) {
+  signup(@Res() response: Response, @Body() user: User) {
     try {
       const { name, email, password, address, phone, country, city } = user;
       if (
@@ -49,10 +50,24 @@ export class UsersController {
         response.status(400).send('Completa todos los campos');
         return;
       }
-      const newUser = this.usersService.createUser(user);
+      const newUser = this.usersService.signUp(user);
       response
         .status(201)
         .send({ message: 'Usuario creado correctamente', user: newUser });
+    } catch {
+      response.status(400).send('Ocurrió un error al crear el usuario');
+    }
+  }
+  @Post()
+  signin(@Res() response: Response, @Body() credentials: ICredentials) {
+    try {
+      const { email, password } = credentials;
+      if (!email || !password) {
+        response.status(400).send('Completa todos los campos');
+        return;
+      }
+      const newUser = this.usersService.signIn(credentials);
+      response.status(201).send({ message: 'Login exitoso', user: newUser });
     } catch {
       response.status(400).send('Ocurrió un error al crear el usuario');
     }
@@ -61,12 +76,12 @@ export class UsersController {
   @Put(':id')
   @UseGuards(AuthGuard)
   putFunction(@Param('id') id: string) {
-    return this.usersService.putFunction(Number(id));
+    return this.usersService.putFunction(id);
   }
 
   @Delete('id')
   @UseGuards(AuthGuard)
   deleteUser(@Param('id') id: string) {
-    return this.usersService.deleteUser(Number(id));
+    return this.usersService.deleteUser(id);
   }
 }

@@ -1,99 +1,66 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
 import { ICredentials } from '../auth/auth.controller';
-
-export interface IUser {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  address: string;
-  phone: string;
-  country: string;
-  city: string;
-}
+import { Repository } from 'typeorm';
+import { User } from 'src/entities/users.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersRepository {
-  private users: IUser[] = [
-    {
-      id: 1,
-      name: 'Tom',
-      email: 'tom@gmail.com',
-      password: '123456',
-      address: 'admiCalle Falsa 123',
-      phone: '123456789',
-      country: 'Argentina',
-      city: 'Buenos Aires',
-    },
-    {
-      id: 2,
-      name: 'Maria',
-      email: 'maria@gmail.com',
-      password: '123456',
-      address: 'admiCalle Falsa 123',
-      phone: '123456789',
-      country: 'Argentina',
-      city: 'Buenos Aires',
-    },
-    {
-      id: 3,
-      name: 'Juan',
-      email: 'juan@gmail.com',
-      password: '123456',
-      address: 'admiCalle Falsa 123',
-      phone: '123456789',
-      country: 'Argentina',
-      city: 'Buenos Aires',
-    },
-  ];
+  constructor(
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
 
   async getUsers(page: number, limit: number) {
-    return this.users.map(({ password, ...user }) => user);
-    // Logica de paginación
+    const users = this.usersRepository.find();
+    return users;
   }
 
-  getUserById(id: number) {
-    return this.users.find((user) => user.id === id);
+  async getUserById(id: string) {
+    const user = await this.usersRepository.findOneBy({ id });
+    return user;
   }
 
-  createUser(user: Omit<IUser, 'id'>) {
-    const id = this.users.length + 1;
-    const newUser = { id, ...user };
-    this.users = [...this.users, newUser];
-    return id;
+  async putFunction(id: string) {
+    // const user = this.users.find((user) => user.id === id);
+    // return ['Logica del put para modificar el usuario con el id', id];
   }
 
-  putFunction(id: number) {
-    const user = this.users.find((user) => user.id === id);
-    return ['Logica del put para modificar el usuario con el id', id];
+  async deleteUser(id: string) {
+    return await this.usersRepository.delete({ id });
   }
 
-  deleteUser(id: number) {
-    const user = this.users.find((user) => user.id === id);
-    return ['Logica del delete para eliminar el usuario con el id: ', user];
+  async getUserByEmail(email: string): Promise<User | null> {
+    return await this.usersRepository.findOneBy({ email });
   }
 
-  signIn(credentials: ICredentials) {
+  async signUp(user: Omit<User, 'id'>) {
+    const existingUser = await this.usersRepository.findOneBy({
+      email: user.email,
+    });
+
+    if (existingUser) {
+      throw new Error('Ya existe un usuario con ese email.');
+    }
+
+    try {
+      const newUser = this.usersRepository.create(user);
+      await this.usersRepository.save(newUser);
+      return newUser;
+    } catch (error) {
+      throw new Error('Error al guardar el usuario en la base de datos.');
+    }
+  }
+
+  async signIn(credentials: ICredentials) {
     const { email, password } = credentials;
 
-    if (!email || !password) {
-      throw Error('Completa todos los campos');
+    const user = await this.usersRepository.findOneBy({ email });
+    if (!user || user.password !== password) {
+      throw new Error('Usuario o contraseña incorrectos.');
     }
 
-    const user = this.users.find(
-      (user) => user.email === email && user.password === password,
-    );
-
-    if (!user) {
-      throw Error('Usuario o contraseña incorrectos.');
-    }
-    return {
-      message: 'Ingreso exitoso',
-      user: (({ password, ...userWithoutPassword }) => userWithoutPassword)(
-        user,
-      ),
-    };
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }

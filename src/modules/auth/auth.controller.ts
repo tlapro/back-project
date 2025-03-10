@@ -3,6 +3,7 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import { User } from 'src/entities/users.entity';
 
 export interface ICredentials {
   email: string;
@@ -18,13 +19,49 @@ export class AuthController {
     return this.authService.getAuth();
   }
 
-  @Post('signin')
-  signIn(@Res() response: Response, @Body() credentials: ICredentials) {
+  @Post('signup')
+  async signUp(@Res() response: Response, @Body() user: User) {
     try {
-      const result = this.authService.signIn(credentials);
-      response.status(200).send({ message: result.message, user: result.user });
+      const { name, email, password, address, phone, country, city } = user;
+      if (
+        !name ||
+        !email ||
+        !password ||
+        !address ||
+        !phone ||
+        !country ||
+        !city
+      ) {
+        return response
+          .status(400)
+          .json({ error: 'Completa todos los campos' });
+      }
+
+      const newUser = await this.authService.signUp(user);
+      return response
+        .status(201)
+        .json({ message: 'Usuario creado correctamente', user: newUser });
     } catch (error) {
-      response.status(404).send({ error: error.message });
+      return response.status(400).json({ error: error.message });
+    }
+  }
+
+  @Post('signin')
+  async signIn(@Res() response: Response, @Body() credentials: ICredentials) {
+    try {
+      const { email, password } = credentials;
+      if (!email || !password) {
+        return response
+          .status(400)
+          .json({ error: 'Completa todos los campos' });
+      }
+
+      const userLogged = await this.authService.signIn(credentials);
+      return response
+        .status(200)
+        .json({ message: 'Login exitoso', user: userLogged });
+    } catch (error) {
+      return response.status(400).json({ error: error.message });
     }
   }
 }
