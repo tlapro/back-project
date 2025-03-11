@@ -9,7 +9,7 @@ export class ProductsRepository {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
-    @InjectRepository(Category)
+    @InjectRepository(Category) // 💡 Inyectamos directamente el repositorio de categorías
     private readonly categoriesRepository: Repository<Category>,
   ) {}
 
@@ -27,38 +27,41 @@ export class ProductsRepository {
         where: { name: productData.name },
       });
 
-      if (!exists) {
-        const category = await this.categoriesRepository.findOne({
-          where: { name: productData.category },
-        });
+      if (exists) continue;
 
-        if (!category) {
-          console.warn(`⚠️ Categoría '${productData.category}' no encontrada`);
-          continue;
-        }
-        console.log(
-          `Cargando en la base de datos el producto: ${productData.name}`,
-        );
-        const product = this.productsRepository.create({
-          ...productData,
-          category,
-        });
-        await this.productsRepository.save(product);
+      const category = await this.categoriesRepository.findOne({
+        where: { name: productData.category },
+      });
+
+      if (!category) {
+        console.warn(`⚠️ Categoría '${productData.category}' no encontrada`);
+        continue;
       }
+
+      console.log(
+        `Cargando en la base de datos el producto: ${productData.name}`,
+      );
+      const product = this.productsRepository.create({
+        ...productData,
+        category,
+      });
+
+      await this.productsRepository.save(product);
     }
   }
 
   async getProducts() {
     return this.productsRepository.find({
-      relations: ['category'], // Esto incluye la categoría asociada en cada producto
+      relations: ['category'],
     });
   }
 
   async getProductById(id: string): Promise<Product> {
-    const product = await this.productsRepository.findOneBy({ id });
-    if (!product) {
-      throw Error('El producto no fue encontrado');
-    }
+    const product = await this.productsRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+    if (!product) throw new Error('El producto no fue encontrado');
     return product;
   }
 
@@ -66,23 +69,3 @@ export class ProductsRepository {
     return this.productsRepository.save(product);
   }
 }
-// getProductById(id: number) {
-//   return this.products.find((product) => product.id === id);
-// }
-
-// createProduct(product: Omit<IProduct, 'id'>) {
-//   const id = this.products.length + 1;
-//   const newProduct = { id, ...product };
-//   this.products = [...this.products, newProduct];
-//   return newProduct;
-// }
-
-// putFunction(id) {
-//   const product = this.products.find((product) => product.id === id);
-//   return ['Logica del put para modificar este producto: ', product];
-// }
-
-// deleteProduct(id: number) {
-//   const product = this.products.find((product) => product.id === id);
-//   return ['Logica del delete para eliminar este producto: ', product];
-// }

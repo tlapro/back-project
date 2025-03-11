@@ -7,6 +7,7 @@ import typeOrmConfig from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { AppSeederService } from './modules/seeder/AppSeeder';
+import { OrdersModule } from './modules/orders/order.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AppSeederService } from './modules/seeder/AppSeeder';
     ProductsModule,
     AuthModule,
     CategoriesModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [AppSeederService],

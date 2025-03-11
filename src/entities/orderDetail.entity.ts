@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -22,6 +23,9 @@ export class OrderDetail {
   @OneToOne(() => Order, (order) => order.orderDetail)
   order: Order;
 
-  @ManyToMany(() => Product, (product) => product.orderDetail)
+  @ManyToMany(() => Product, (product) => product.orderDetail, {
+    eager: true,
+  })
+  @JoinTable()
   products: Product[];
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -22,10 +24,19 @@ export class UsersController {
 
   @Get()
   @UseGuards(AuthGuard)
-  getUsers(@Query('page') page?: string, @Query('limit') limit?: string) {
+  async getUsers(
+    @Res() response: Response,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     const pageNumber = page ? Number(page) : 1;
     const limitNumber = limit ? Number(limit) : 5;
-    return this.usersService.getUsers(pageNumber, limitNumber);
+    try {
+      const users = await this.usersService.getUsers(pageNumber, limitNumber);
+      return response.status(201).json(users);
+    } catch (error) {
+      return response.status(400).json({ error: error.message });
+    }
   }
 
   @Get(':id')

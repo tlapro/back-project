@@ -14,7 +14,7 @@ import { OrderDetail } from './orderDetail.entity';
   name: 'orders',
 })
 export class Order {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
   @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
@@ -24,7 +24,7 @@ export class Order {
   @Column({ type: 'timestamp' })
   date: Date;
 
-  @OneToOne(() => OrderDetail, { cascade: true })
+  @OneToOne(() => OrderDetail, { cascade: true, eager: true })
   @JoinColumn({ name: 'order_details_id' })
   orderDetail: OrderDetail;
 }

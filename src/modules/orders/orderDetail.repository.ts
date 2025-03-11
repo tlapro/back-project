@@ -12,8 +12,10 @@ export class OrderDetailRepository {
 
   async saveOrderDetail(order: OrderDetail): Promise<OrderDetail> {
     const orderDetail = this.orderDetailRepository.create({
-      order,
+      price: order.price,
+      products: order.products,
     });
+
     return await this.orderDetailRepository.save(orderDetail);
   }
 }

@@ -6,7 +6,11 @@ import { IOrder } from 'src/interfaces/IOrder';
 export class OrdersService {
   constructor(private ordersRepository: OrdersRepository) {}
 
-  addOrder(order: IOrder) {
-    this.ordersRepository.addOrder(order);
+  getOrders() {
+    return this.ordersRepository.getAllOrders();
+  }
+
+  async addOrder(order: IOrder) {
+    await this.ordersRepository.addOrder(order);
   }
 }

@@ -12,7 +12,10 @@ export class UsersRepository {
   ) {}
 
   async getUsers(page: number, limit: number) {
-    const users = this.usersRepository.find();
+    const users = await this.usersRepository.find();
+    if (users.length === 0) {
+      throw new Error('No existen usuarios registrados.');
+    }
     return users;
   }
 

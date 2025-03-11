@@ -27,4 +27,11 @@ export class CategoriesRepository {
       }
     }
   }
+  async findCategory(categoryName: string) {
+    const category = await this.categoriesRepository.findOne({
+      where: { name: categoryName },
+    });
+    console.log(category);
+    return category;
+  }
 }

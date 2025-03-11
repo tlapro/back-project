@@ -4,11 +4,9 @@ import { Repository } from 'typeorm';
 import { Order } from 'src/entities/orders.entity';
 import { OrderDetail } from 'src/entities/orderDetail.entity';
 import { ProductsRepository } from '../products/products.repository';
-
 import { IOrder } from 'src/interfaces/IOrder';
 import { OrderDetailRepository } from './orderDetail.repository';
 import { Product } from 'src/entities/product.entity';
-import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class OrdersRepository {
@@ -16,8 +14,13 @@ export class OrdersRepository {
     @InjectRepository(Order) private ordersRepository: Repository<Order>,
     private readonly productsRepository: ProductsRepository,
     private readonly orderDetailsRepository: OrderDetailRepository,
-    private readonly usersRepository: UsersRepository,
   ) {}
+
+  async getAllOrders(): Promise<Order[]> {
+    return await this.ordersRepository.find({
+      relations: ['orderDetail', 'orderDetail.products'],
+    });
+  }
 
   async addOrder(order: IOrder) {
     if (!order.userId || !order.products || order.products.length === 0) {
@@ -25,8 +28,6 @@ export class OrdersRepository {
         'Faltan datos en la petición o la lista de productos está vacía.',
       );
     }
-
-    // Obtener productos y filtrar los que tienen stock disponible
     const products: Product[] = [];
     let totalPrice = 0;
 
@@ -39,8 +40,13 @@ export class OrdersRepository {
 
       product.stock -= 1;
       await this.productsRepository.saveProduct(product);
+      console.log(product.name);
+      console.log(
+        `Tipo de product.price: ${typeof product.price}, Valor: ${product.price}`,
+      );
 
-      totalPrice += product.price;
+      totalPrice += Number(product.price);
+
       products.push(product);
     }
 
@@ -50,7 +56,11 @@ export class OrdersRepository {
 
     const orderDetail = new OrderDetail();
     orderDetail.products = products;
-    orderDetail.price = totalPrice;
+    orderDetail.price = parseFloat(totalPrice.toFixed(2));
+    console.log(`Precio total de la orden: ${orderDetail.price}`);
+    if (!orderDetail.price || isNaN(orderDetail.price)) {
+      throw new Error('El precio total no es válido.');
+    }
 
     const savedOrderDetail =
       await this.orderDetailsRepository.saveOrderDetail(orderDetail);
