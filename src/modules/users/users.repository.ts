@@ -4,6 +4,7 @@ import { ICredentials } from '../auth/auth.controller';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersRepository {
@@ -12,7 +13,9 @@ export class UsersRepository {
   ) {}
 
   async getUsers(page: number, limit: number) {
-    const users = await this.usersRepository.find();
+    const users = await this.usersRepository.find({
+      relations: ['orders'],
+    });
     if (users.length === 0) {
       throw new Error('No existen usuarios registrados.');
     }
@@ -47,7 +50,9 @@ export class UsersRepository {
     }
 
     try {
-      const newUser = this.usersRepository.create(user);
+      const hashedPassword = await this.hashPassword(user.password);
+      const userHashed = { ...user, password: hashedPassword };
+      const newUser = this.usersRepository.create(userHashed);
       await this.usersRepository.save(newUser);
       return newUser;
     } catch (error) {
@@ -55,15 +60,34 @@ export class UsersRepository {
     }
   }
 
+  async hashPassword(password: string): Promise<string> {
+    if (!password || typeof password !== 'string') {
+      throw new Error('La contraseña debe ser un string válido.');
+    }
+    const saltRounds = 10;
+    return await bcrypt.hash(password, saltRounds);
+  }
+
   async signIn(credentials: ICredentials) {
     const { email, password } = credentials;
-
     const user = await this.usersRepository.findOneBy({ email });
-    if (!user || user.password !== password) {
+    if (!user) {
+      throw new Error('Usuario o contraseña incorrectos.');
+    }
+    const isPasswordOk = await this.comparePasswords(password, user.password);
+
+    if (!isPasswordOk) {
       throw new Error('Usuario o contraseña incorrectos.');
     }
 
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  async comparePasswords(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPassword);
   }
 }
