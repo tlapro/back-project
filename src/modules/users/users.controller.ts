@@ -16,8 +16,8 @@ import {
 import { UsersService } from './users.service';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { User } from 'src/entities/users.entity';
 import { ICredentials } from '../auth/auth.controller';
+import { CreateUserDto } from './dtos/CreateUser.dto';
 
 @Controller('users')
 export class UsersController {
@@ -47,21 +47,8 @@ export class UsersController {
   }
 
   @Post()
-  signup(@Res() response: Response, @Body() user: User) {
+  signUp(@Res() response: Response, @Body() user: CreateUserDto) {
     try {
-      const { name, email, password, address, phone, country, city } = user;
-      if (
-        !name ||
-        !email ||
-        !password ||
-        !address ||
-        !phone ||
-        !country ||
-        !city
-      ) {
-        response.status(400).send('Completa todos los campos');
-        return;
-      }
       const newUser = this.usersService.signUp(user);
       response
         .status(201)
@@ -87,13 +74,13 @@ export class UsersController {
 
   @Put(':id')
   @UseGuards(AuthGuard)
-  putFunction(@Param('id') id: string) {
+  putFunction(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.putFunction(id);
   }
 
   @Delete('id')
   @UseGuards(AuthGuard)
-  deleteUser(@Param('id') id: string) {
+  deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
 }

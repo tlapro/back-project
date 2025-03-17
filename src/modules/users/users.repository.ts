@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './dtos/CreateUser.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -40,7 +41,7 @@ export class UsersRepository {
     return await this.usersRepository.findOneBy({ email });
   }
 
-  async signUp(user: Omit<User, 'id'>) {
+  async signUp(user: CreateUserDto) {
     const existingUser = await this.usersRepository.findOneBy({
       email: user.email,
     });

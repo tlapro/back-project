@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { User } from 'src/entities/users.entity';
 import { ICredentials } from '../auth/auth.controller';
+import { CreateUserDto } from './dtos/CreateUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
     return this.usersRepository.getUserById(id);
   }
 
-  signUp(user: Omit<User, 'id'>) {
+  signUp(user: Omit<CreateUserDto, 'id'>) {
     return this.usersRepository.signUp(user);
   }
 

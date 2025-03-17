@@ -3,7 +3,8 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { User } from 'src/entities/users.entity';
+import { CreateUserDto } from '../users/dtos/CreateUser.dto';
+import { LoginUserDto } from '../users/dtos/LoginUser.dto';
 
 export interface ICredentials {
   email: string;
@@ -20,7 +21,7 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signUp(@Res() response: Response, @Body() user: User) {
+  async signUp(@Res() response: Response, @Body() user: CreateUserDto) {
     try {
       const { name, email, password, address, phone, country, city } = user;
       if (
@@ -47,7 +48,7 @@ export class AuthController {
   }
 
   @Post('signin')
-  async signIn(@Res() response: Response, @Body() credentials: ICredentials) {
+  async signIn(@Res() response: Response, @Body() credentials: LoginUserDto) {
     try {
       const { email, password } = credentials;
       if (!email || !password) {

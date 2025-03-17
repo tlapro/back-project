@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import { ICredentials } from './auth.controller';
-import { User } from 'src/entities/users.entity';
+import { CreateUserDto } from '../users/dtos/CreateUser.dto';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +9,7 @@ export class AuthService {
   getAuth() {
     return 'Get all auths.';
   }
-  async signUp(user: Omit<User, 'id'>) {
+  async signUp(user: Omit<CreateUserDto, 'id'>) {
     return await this.usersRepository.signUp(user);
   }
 
