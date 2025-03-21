@@ -1,7 +1,10 @@
 import {
   Controller,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Post,
   UploadedFile,
@@ -32,7 +35,20 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 200000,
+            message: 'El archivo debe ser menor a 200kb',
+          }),
+          new FileTypeValidator({
+            fileType: /(jpg|jpeg|png|webp)$/,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
     const imgUrl = await this.cloudinaryService.uploadImage(file);
     if (!imgUrl?.url) {

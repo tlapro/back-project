@@ -76,5 +76,6 @@ export class ProductsRepository {
     }
     product.imgUrl = imgUrl;
     await this.productsRepository.save(product);
+    return product;
   }
 }
