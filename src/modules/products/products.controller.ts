@@ -1,9 +1,22 @@
-import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/common/cloudinary.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get()
   getProducts() {
@@ -13,6 +26,19 @@ export class ProductsController {
   @Get(':id')
   getProductById(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.getProductById(id);
+  }
+
+  @Post('upload-image/:id')
+  @UseInterceptors(FileInterceptor('image'))
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const imgUrl = await this.cloudinaryService.uploadImage(file);
+    if (!imgUrl?.url) {
+      return 'Error al subir la imagen a Cloudinary';
+    }
+    return this.productsService.putImage(imgUrl.url, id);
   }
 }
 

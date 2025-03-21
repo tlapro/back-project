@@ -68,4 +68,13 @@ export class ProductsRepository {
   async saveProduct(product: Product) {
     return this.productsRepository.save(product);
   }
+
+  async putImage(imgUrl: string, id: string) {
+    const product = await this.productsRepository.findOne({ where: { id } });
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    product.imgUrl = imgUrl;
+    await this.productsRepository.save(product);
+  }
 }

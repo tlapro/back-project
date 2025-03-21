@@ -19,6 +19,9 @@ export class ProductsService {
   getProductById(id: string) {
     return this.productsRepository.getProductById(id);
   }
+  putImage(imgUrl: string, id: string) {
+    return this.productsRepository.putImage(imgUrl, id);
+  }
 }
 
 // createProduct(user: Omit<IProduct, 'id'>) {
