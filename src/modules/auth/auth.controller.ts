@@ -43,9 +43,7 @@ export class AuthController {
       }
 
       const userLogged = await this.authService.signIn(credentials);
-      return response
-        .status(200)
-        .json({ message: 'Login exitoso', user: userLogged });
+      return response.status(200).json(userLogged);
     } catch (error) {
       return response.status(400).json({ error: error.message });
     }

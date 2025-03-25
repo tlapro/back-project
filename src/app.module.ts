@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { AppSeederService } from './modules/seeder/AppSeeder';
 import { OrdersModule } from './modules/orders/order.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -25,6 +26,11 @@ import { OrdersModule } from './modules/orders/order.module';
     AuthModule,
     CategoriesModule,
     OrdersModule,
+    JwtModule.register({
+      global: true,
+      signOptions: { expiresIn: '1h' },
+      secret: process.env.JWT_SECRET,
+    }),
   ],
   controllers: [],
   providers: [AppSeederService],

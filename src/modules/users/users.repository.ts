@@ -7,11 +7,13 @@ import { User } from 'src/entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dtos/CreateUser.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async getUsers(page: number, limit: number) {
@@ -85,16 +87,22 @@ export class UsersRepository {
     const { email, password } = credentials;
     const user = await this.usersRepository.findOneBy({ email });
     if (!user) {
-      throw new Error('Usuario o contraseña incorrectos.');
+      throw new BadRequestException('Usuario o contraseña incorrectos.');
     }
     const isPasswordOk = await this.comparePasswords(password, user.password);
 
     if (!isPasswordOk) {
-      throw new Error('Usuario o contraseña incorrectos.');
+      throw new BadRequestException('Usuario o contraseña incorrectos.');
     }
+    const userPayload = {
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+    };
 
+    const token = await this.jwtService.signAsync(userPayload);
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return { success: 'Login Successfully', user: userWithoutPassword, token };
   }
 
   async comparePasswords(
