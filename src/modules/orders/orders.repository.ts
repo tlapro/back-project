@@ -75,4 +75,8 @@ export class OrdersRepository {
 
     return this.ordersRepository.save(newOrder);
   }
+  async getOrderById(id: string) {
+    const order = await this.ordersRepository.findOne({ where: { id } });
+    return order;
+  }
 }

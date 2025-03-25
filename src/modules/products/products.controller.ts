@@ -8,11 +8,13 @@ import {
   ParseUUIDPipe,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/common/cloudinary.service';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -32,6 +34,7 @@ export class ProductsController {
   }
 
   @Post('upload-image/:id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(
     @Param('id') id: string,

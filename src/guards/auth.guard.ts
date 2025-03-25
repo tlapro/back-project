@@ -4,6 +4,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
@@ -18,10 +19,10 @@ export class AuthGuard implements CanActivate {
 
     const authHeader = request.headers['authorization'];
     if (!authHeader) {
-      throw new BadRequestException('Authorization header missing');
+      throw new UnauthorizedException('Authorization header missing');
     }
     if (typeof authHeader !== 'string') {
-      throw new BadRequestException('Authorization header must be a string');
+      throw new UnauthorizedException('Authorization header must be a string');
     }
 
     const parts = authHeader.split(' ');

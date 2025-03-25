@@ -13,4 +13,8 @@ export class OrdersService {
   async addOrder(order: IOrder) {
     await this.ordersRepository.addOrder(order);
   }
+
+  getOrderById(id: string) {
+    return this.ordersRepository.getOrderById(id);
+  }
 }
