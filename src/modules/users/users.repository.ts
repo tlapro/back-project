@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ICredentials } from '../auth/auth.controller';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities/users.entity';
@@ -51,13 +52,24 @@ export class UsersRepository {
     }
 
     try {
+      if (user.password !== user.confirmPassword) {
+        throw new BadRequestException('Las contraseñas no coinciden');
+      }
       const hashedPassword = await this.hashPassword(user.password);
       const userHashed = { ...user, password: hashedPassword };
       const newUser = this.usersRepository.create(userHashed);
       await this.usersRepository.save(newUser);
-      return newUser;
+      const {
+        password: ignoredPassword,
+        confirmPassword: ignoredConfirmPassword,
+        ...userWithoutPassword
+      } = user;
+
+      return userWithoutPassword;
     } catch (error) {
-      throw new Error('Error al guardar el usuario en la base de datos.');
+      throw new BadRequestException(
+        error.message || 'Ocurrió un error inesperado',
+      );
     }
   }
 

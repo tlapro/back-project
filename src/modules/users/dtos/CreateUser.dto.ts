@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   IsNotEmpty,
   IsString,
@@ -7,8 +6,19 @@ import {
   IsEmail,
   Matches,
   IsNumber,
+  // Validate,
 } from 'class-validator';
 
+// @ValidatorConstraint({ name: 'passwordMatch', async: false })
+// export class PasswordMatch implements ValidatorConstraintInterface {
+//   validate(confirmPassword: string, args: ValidationArguments) {
+//     const { password } = args.object as CreateUserDto;
+//     return password === confirmPassword;
+//   }
+//   defaultMessage() {
+//     return 'Las contraseñas no coinciden';
+//   }
+// }
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
@@ -30,6 +40,10 @@ export class CreateUserDto {
       'La contraseña debe contener al menos una letra minúscula, una letra mayúscula, un número y un carácter especial (!@#$%^&*)',
   })
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  confirmPassword: string;
 
   @IsNotEmpty()
   @IsString()

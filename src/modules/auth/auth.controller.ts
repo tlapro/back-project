@@ -23,21 +23,6 @@ export class AuthController {
   @Post('signup')
   async signUp(@Res() response: Response, @Body() user: CreateUserDto) {
     try {
-      const { name, email, password, address, phone, country, city } = user;
-      if (
-        !name ||
-        !email ||
-        !password ||
-        !address ||
-        !phone ||
-        !country ||
-        !city
-      ) {
-        return response
-          .status(400)
-          .json({ error: 'Completa todos los campos' });
-      }
-
       const newUser = await this.authService.signUp(user);
       return response
         .status(201)
